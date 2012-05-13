@@ -1,0 +1,37 @@
+<?php
+
+
+function menupoly_example_menu() {
+
+  return array(
+    'admin/structure/menu/menupoly/example' => array(
+      'page callback' => 'menupoly_example_page',
+      'access arguments' => array('administer site configuration'),
+      'title' => 'Menupoly example',
+    ),
+  );
+}
+
+
+function menupoly_example_page() {
+  $config = array(
+    'subject' => t('Main menu (example)'),
+    'menu_name' => 'main-menu',
+    'root_mlid' => '0',
+    'title_link' => 0,
+    'admin_title' => '',
+    'level' => 1,
+    'follow' => 0,
+    'depth' => 3,
+    'expanded' => 0,
+    'expand' => 0,
+    'sort' => 0,
+  );
+  return menupoly_view($config);
+}
+
+
+
+
+
+

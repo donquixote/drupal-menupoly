@@ -1,0 +1,8 @@
+name = "Menupoly"
+description = "Menu building module, similar to menu_block"
+package = Menu
+core = 7.x
+php = 5.2
+
+dependencies[] = xautoload
+dependencies[] = htmltag

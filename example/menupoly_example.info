@@ -1,0 +1,7 @@
+name = "Menupoly example"
+description = "Example module for menupoly."
+package = Menu
+core = 7.x
+php = 5.2
+
+dependencies[] = menupoly
