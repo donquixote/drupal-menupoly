@@ -20,7 +20,10 @@ class menupoly_MenuTheme_Static extends menupoly_MenuTheme_Abstract {
   }
 
   protected function _itemAttributes($item, $options, $submenu_html) {
-    $attr = htmltag_class_attribute($item['class']);
+    $attr = htmltag_tag_attributes();
+    if (@$item['class']) {
+      $attr->addClass($item['class']);
+    }
     $attr->addClass($submenu_html ? 'expanded' : ($item['has_children'] ? 'collapsed' : 'leaf'));
     $attr->addClassesIf(array(
       'active' => @$item['active'],
