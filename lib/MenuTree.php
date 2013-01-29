@@ -6,18 +6,23 @@
  */
 class menupoly_MenuTree {
 
-  protected $_submenus;
-  protected $_items;
-  protected $_root_key;
+  protected $_rootMlid;
+  protected $_submenus = array();
+  protected $_items = array();
 
-  function __construct(array $submenus, array $items, $root_key = 0) {
-    $this->_submenus = $submenus;
-    $this->_items = $items;
-    $this->_root_key = $root_key;
+  function __construct($root_mlid = 0) {
+    $this->_rootMlid = $root_mlid;
   }
 
-  function getRootItems() {
-    return $this->getSubmenuItems($this->_root_key);
+  /**
+   * Add items and their parent/child relationships.
+   */
+  function addItems($items) {
+    foreach ($items as $mlid => $item) {
+      $plid = !empty($item['plid']) ? $item['plid'] : 0;
+      $this->_submenus[$plid][$mlid] = $mlid;
+      $this->_items[$mlid] = $item;
+    }
   }
 
   function getSubmenuItems($parent_mlid) {
@@ -41,10 +46,10 @@ class menupoly_MenuTree {
   }
 
   function render($theme = NULL) {
-    return $this->_renderSubmenu($theme, $this->_root_key, 1);
+    return $this->renderSubmenu($theme, $this->_rootMlid, 1);
   }
 
-  protected function _renderSubmenu($theme, $parent_mlid, $depth) {
+  protected function renderSubmenu($theme, $parent_mlid, $depth) {
     $html = '';
     $submenu = @$this->_submenus[$parent_mlid];
     if (is_object($submenu)) {
@@ -74,7 +79,7 @@ class menupoly_MenuTree {
         $mlid = $submenu_sorted[$k];
         $options = $item['localized_options'];
         $options = is_array($options) ? $options : array();
-        $subtree_html = $this->_renderSubmenu($theme, $mlid, $depth + 1);
+        $subtree_html = $this->renderSubmenu($theme, $mlid, $depth + 1);
         $pieces[$k] = $theme->renderMenuItem($item, $options, $subtree_html);
       }
       if (!empty($pieces)) {

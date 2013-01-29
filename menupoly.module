@@ -1,5 +1,9 @@
 <?php
 
+define('MENUPOLY_EXPAND_ALL', 1);
+define('MENUPOLY_EXPAND_ACTIVE', 2);
+define('MENUPOLY_EXPAND_EXPANDED', 4);
+
 
 /**
  * Implements hook_theme().
@@ -38,12 +42,11 @@ function menupoly_block_info() {
   foreach ($definitions as $module => $module_definitions) {
     foreach ($module_definitions as $key => $config) {
       $delta = "$module-$key";
-      $menu_name = $config['menu_name'];
       $blocks[$delta] = array(
-        'info' => "Menublock [$delta]",
-        // 'cache' => BLOCK_NO_CACHE,
+        'info' => "Menupoly [$delta]",
+        'cache' => DRUPAL_NO_CACHE,
       );
-      if (is_array($config['block'])) {
+      if (is_array(@$config['block'])) {
         $blocks[$delta] += $config['block'];
       }
     }
@@ -51,12 +54,34 @@ function menupoly_block_info() {
   return $blocks;
 }
 
+/**
+ * Implements hook_block_view()
+ */
+function menupoly_block_view($delta = '') {
+  list($module, $key) = explode('-', $delta);
+  $f = $module . '_menupoly';
+  if (!function_exists($f)) {
+    return;
+  }
+  $result = $f();
+  if (!isset($result[$key])) {
+    return;
+  }
+  $config = $result[$key];
+  return $config + array(
+    'content' => array(
+      '#theme' => 'menupoly',
+      '#menupoly' => $config,
+    ),
+  );
+}
+
 
 function _menupoly_get_block_definitions() {
   $definitions = array();
   foreach (module_implements('menupoly') as $module) {
     $function = $module . '_menupoly';
-    $result = $function('list');
+    $result = $function();
     foreach ($result as $key => $config) {
       $definitions[$module][$key] = $config;
     }
@@ -104,22 +129,13 @@ function theme_menupoly($vars) {
 function _menupoly_view(&$config, $seeds) {
 
   menupoly_process_config($config);
-  module_load_include('tree.inc', 'menupoly');
-  $tree = menupoly_load_tree($config, $seeds);
 
-  $title = _menupoly_title($config);
-  if ($title) {
-    $data['subject'] = $title;
-  }
+  $source = new menupoly_MenuTreeSource_MenuLinks();
+  $source->setTrailPaths($seeds);
+  $tree = $source->build($config);
 
-  // Localize the tree.
-  if (module_exists('i18nmenu') && FALSE) {
-    i18nmenu_localize_tree($tree);
-  }
-
-  // Sort the active path to the top of the tree.
-  if ($config['sort'] && FALSE) {
-    menu_tree_sort_active_path($tree);
+  if (!$tree) {
+    return;
   }
 
   // Render the tree.
@@ -269,4 +285,45 @@ function menupoly_get_seeds() {
     }
   }
   return $seeds;
+}
+
+
+/**
+ * This function is much more innocent than _menu_tree_check_access().
+ * It does not actually remove anything,
+ * it just sets the $item['access'] to either TRUE or FALSE.
+ */
+function menupoly_items_check_access(&$items) {
+
+  // Collect node links
+  $node_links = array();
+  foreach ($items as $mlid => &$item) {
+    if ($item['router_path'] === 'node/%') {
+      $nid = substr($item['link_path'], 5);
+      if (is_numeric($nid)) {
+        $node_links[(int)$nid][$mlid] = $mlid;
+      }
+    }
+  }
+
+  // Adapted from menu_tree_check_access()
+  if (!empty($node_links)) {
+    $nids = array_keys($node_links);
+    $select = db_select('node', 'n');
+    $select->addField('n', 'nid');
+    $select->condition('n.status', 1);
+    $select->condition('n.nid', $nids, 'IN');
+    $select->addTag('node_access');
+    $nids = $select->execute()->fetchCol();
+    foreach ($nids as $nid) {
+      foreach ($node_links[$nid] as $mlid) {
+        $items[$mlid]['access'] = TRUE;
+      }
+    }
+  }
+
+  // Process all items that are not node links.
+  foreach ($items as $mlid => &$item) {
+    _menu_link_translate($item);
+  }
 }
