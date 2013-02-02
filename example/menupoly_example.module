@@ -36,6 +36,11 @@ function menupoly_example_menu() {
       'access arguments' => array('administer site configuration'),
       'title' => 'Menupoly example',
     ),
+    'admin/structure/menu/menupoly/example2' => array(
+      'page callback' => 'menupoly_example_page_2',
+      'access arguments' => array('administer site configuration'),
+      'title' => 'Menupoly example 2',
+    ),
   );
 }
 
@@ -59,26 +64,26 @@ function menupoly_example_page() {
 function menupoly_example_page_2() {
 
   // Typical top-level "flat" menu.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'depth' => 1,
   );
 
   // Typical second-level "flat" menu.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'level' => 2,
     'depth' => 1,
   );
 
   // Typical fully expanded dropdown menu.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'expand' => MENUPOLY_EXPAND_ALL,
   );
 
   // Typical fully expanded dropdown menu with i18n menu selection.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'menu-test-nav',
     // This will replace the menu name with e.g. menu-test-nav-fr, if you browse
     // in French, and the respective menu exists.
@@ -87,7 +92,7 @@ function menupoly_example_page_2() {
   );
 
   // Dropdown menu for the current sub-section of the site.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'expand' => MENUPOLY_EXPAND_ALL,
     'level' => 2,
@@ -96,49 +101,63 @@ function menupoly_example_page_2() {
   // Typical sidebar menu, where submenus are expanded if
   // - the parent is in the active trail, OR
   // - the parent is marked as "expanded".
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
   );
 
   // Typical sidebar menu, where submenus are expanded if
   // - the parent is in the active trail.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'expand' => MENUPOLY_EXPAND_ACTIVE,
   );
 
   // Typical sidebar menu, where submenus are expanded if
   // - the parent is marked as "expanded".
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'expand' => MENUPOLY_EXPAND_EXPANDED,
   );
 
   // Sidebar menu starting at second level.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'level' => 2,
   );
 
   // Show "children" of the current page.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'follow' => MENUPOLY_FOLLOW_CHILDREN,
     'depth' => 1,
   );
 
   // Show "siblings" of the current page.
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'follow' => MENUPOLY_FOLLOW_SIBLINGS,
     'depth' => 1,
   );
 
   // Show the submenu tree under 'node/123'
-  $config = array(
+  $variations[] = array(
     'menu_name' => 'main-menu',
     'parent_path' => 'node/123',
   );
+
+  $n = count($variations) - 1;
+  $i = (int)@$_GET['variation'];
+  $v = $variations[$i];
+  $text = t("Choose a number from 0 to $n");
+  $pre = print_r($v, TRUE);
+  $html = <<<EOT
+<form method="GET">
+  <p>$text</p>
+  <input type="text" class="form-text" name="variation" />
+</form>
+<code><pre>$pre</pre></code>
+EOT;
+  return $html . menupoly_view($v);
 }
 
 

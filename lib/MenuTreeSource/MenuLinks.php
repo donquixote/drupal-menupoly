@@ -92,12 +92,14 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
         unset($plids[$k]);
       }
     }
-    $q = $this->_selectItems();
-    $q->condition('plid', $plids);
-    $items_new = $q->execute()->fetchAllAssoc('mlid', PDO::FETCH_ASSOC);
-    $plids = array_keys($items_new);
-    $items += $items_new;
-    $this->_expandExpanded($items, $plids);
+    if (!empty($plids)) {
+      $q = $this->_selectItems();
+      $q->condition('plid', $plids);
+      $items_new = $q->execute()->fetchAllAssoc('mlid', PDO::FETCH_ASSOC);
+      $plids = array_keys($items_new);
+      $items += $items_new;
+      $this->_expandExpanded($items, $plids);
+    }
   }
 
   protected function _dynamicRootCondition(array $settings) {
