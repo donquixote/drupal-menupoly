@@ -19,37 +19,10 @@ function menupoly_example_menupoly() {
       // ??
       'level' => 1,
       // ??
-      'follow' => 0,
+      // 'follow' => MENUPOLY_FOLLOW_CHILDREN,
       'sort' => 0,
-
-      // depth up to which we expand everything.
-      // 0 means that nothing is shown.
-      // 1 means that only the submenu directly under root is shown.
-      // NULL means no depth limit, all submenus under root are expanded.
-      // Defaults to 0.
-      'depth_all' => 3,
-
-      // depth up to which we expand submenus where the parent is marked as
-      // "expanded". 0, 1 and NULL as above for depth_all.
-      // Defaults to 0 
-      'depth_expanded' => 4,
-
-      // depth up to which we expand streets for seeds.
-      // Defaults to 0.
-      'depth_street' => 5,
-
-      // minimum depth for items, measured from root.
-      // 1: no limit
-      // n: the root will be newly determined depending on active trail.
-      // Defaults to 1.
-      'mindepth' => 0,
-
-      // Legacy depth value. Meaning depends on 'expand' and 'expanded' settings.
-      'depth' => 3,
-      // Legacy value that combines street depth and pyramid depth.
-      'maxdepth' => 5,
-      'expanded' => 0,
-      'expand' => MENUPOLY_EXPAND_ACTIVE,
+      // 'depth' => 2,
+      'expand' => MENUPOLY_EXPAND_ALL,
     ),
   );
 }
@@ -112,7 +85,6 @@ function menupoly_example_page() {
     'depth' => 3,
     // Legacy value that combines street depth and pyramid depth.
     'maxdepth' => 5,
-    'expanded' => 0,
     'expand' => MENUPOLY_EXPAND_ALL,
   );
   return menupoly_view($config);

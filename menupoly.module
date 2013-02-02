@@ -4,326 +4,62 @@ define('MENUPOLY_EXPAND_ALL', 1);
 define('MENUPOLY_EXPAND_ACTIVE', 2);
 define('MENUPOLY_EXPAND_EXPANDED', 4);
 
+define('MENUPOLY_FOLLOW_SIBLINGS', 1);
+define('MENUPOLY_FOLLOW_CHILDREN', 2);
 
 /**
  * Implements hook_theme().
  */
 function menupoly_theme(&$existing) {
-
-  // Add theme hook suggestion patterns for the core theme functions used in
-  // this module. We can't add them during hook_theme_registry_alter() because
-  // we will already have missed the opportunity for the theme engine's
-  // theme_hook() to process the pattern. And we can't run the pattern ourselves
-  // because we aren't given the type, theme and path in that hook.
-  $existing['menu_tree']['pattern'] = 'menu_tree__';
-  $existing['menu_item']['pattern'] = 'menu_item__';
-  $existing['menu_item_link']['pattern'] = 'menu_item_link__';
-
-  return array(
-    'menupoly_wrapper' => array(
-      'template' => 'menupoly-wrapper',
-      'variables' => array('content' => NULL, 'settings' => NULL, 'delta' => NULL),
-      'pattern' => 'menupoly_wrapper__',
-    ),
-    'menupoly' => array(
-      'variables' => array('menupoly' => NULL, 'menupoly_seeds' => NULL),
-      'pattern' => 'menupoly',
-    ),
-  );
+  return menupoly('info')->hook_theme($existing);
 }
-
 
 /**
  * Implements hook_block_info()
  */
 function menupoly_block_info() {
-  $definitions = _menupoly_get_block_definitions();
-  $blocks = array();
-  foreach ($definitions as $module => $module_definitions) {
-    foreach ($module_definitions as $key => $config) {
-      $delta = "$module-$key";
-      $blocks[$delta] = array(
-        'info' => "Menupoly [$delta]",
-        'cache' => DRUPAL_NO_CACHE,
-      );
-      if (is_array(@$config['block'])) {
-        $blocks[$delta] += $config['block'];
-      }
-    }
-  }
-  return $blocks;
+  return menupoly('blocks')->hook_block_info();
 }
 
 /**
  * Implements hook_block_view()
  */
 function menupoly_block_view($delta = '') {
-  list($module, $key) = explode('-', $delta);
-  $f = $module . '_menupoly';
-  if (!function_exists($f)) {
-    return;
-  }
-  $result = $f();
-  if (!isset($result[$key])) {
-    return;
-  }
-  $config = $result[$key];
-  return $config + array(
-    'content' => array(
-      '#theme' => 'menupoly',
-      '#menupoly' => $config,
-    ),
-  );
+  return menupoly('blocks')->hook_block_view($delta);
 }
-
-
-function _menupoly_get_block_definitions() {
-  $definitions = array();
-  foreach (module_implements('menupoly') as $module) {
-    $function = $module . '_menupoly';
-    $result = $function();
-    foreach ($result as $key => $config) {
-      $definitions[$module][$key] = $config;
-    }
-  }
-  return $definitions;
-}
-
 
 /**
- * Process variables for menu-block-wrapper.tpl.php.
+ * Render a menu tree defined by a config array.
  *
- * @see menu-block-wrapper.tpl.php
+ * @param array $settings
+ *
+ * @return string
+ *   Rendered HTML.
  */
-function template_preprocess_menupoly_wrapper(&$variables) {
-  $variables['classes_array'][] = 'menupoly-'. $variables['delta'];
-  $variables['classes_array'][] = 'menu-name-'. $variables['settings']['menu_name'];
-  $variables['classes_array'][] = 'parent-mlid-'. $variables['settings']['parent_mlid'];
-  $variables['classes_array'][] = 'menu-level-'. $variables['settings']['level'];
-  $variables['classes'] = check_plain(implode(' ', $variables['classes_array']));
-  $variables['template_files'][] = 'menu-block-wrapper-'. $variables['settings']['menu_name'];
+function menupoly_view(array $settings) {
+  return menupoly('main')->settingsToHtml($settings);
 }
-
-
-function menupoly_view($config) {
-  $render = array(
-    '#theme' => 'menupoly',
-    '#menupoly' => $config,
-  );
-  return drupal_render($render);
-}
-
-
-function template_preprocess_menupoly(&$vars) {
-  if (!isset($vars['menupoly_seeds'])) {
-    $vars['menupoly_seeds'] = menupoly_get_seeds();
-  }
-}
-
-
-function theme_menupoly($vars) {
-  return _menupoly_view($vars['menupoly'], $vars['menupoly_seeds']);
-}
-
-
-function _menupoly_view(&$config, $seeds) {
-
-  menupoly_process_config($config);
-
-  $source = new menupoly_MenuTreeSource_MenuLinks();
-  $source->setTrailPaths($seeds);
-  $tree = $source->build($config);
-
-  if (!$tree) {
-    return;
-  }
-
-  // Render the tree.
-  $tree_html = $tree->render($config['menu_theme']);
-
-  return _menupoly_wrap_html($tree_html, $config);
-}
-
 
 /**
- * Expand a $config array from the database with runtime information
- * based on current page, current user, current language etc.
+ * Default theme implementation for 'menupoly'.
  */
-function menupoly_process_config(&$config) {
-
-  // menu name suffix
-  if (!empty($config['i18n_menu_name_suffix'])) {
-    $i18n_suffix = '_'. $GLOBALS['language']->language;
-    if (_menupoly_menu_exists($config['menu_name'] . $i18n_suffix)) {
-      $config['menu_name_original'] = $config['menu_name'];
-      $config['menu_name'] .= $i18n_suffix;
-    }
-  }
-
-  if (empty($config['menu_theme'])) {
-    $config['menu_theme'] = new menupoly_MenuTheme_Static();
-  }
-
-  // calculate min and max depth
-  $config['mindepth'] = min(1, $config['level']);
-  $config['maxdepth'] = ($config['depth'] > 0) ? ($config['mindepth'] + $config['depth'] - 1) : 9;
+function theme_menupoly(array $vars) {
+  return menupoly('main')->settingsToHtml($vars['menupoly']);
 }
-
-
-function _menupoly_title($config) {
-
-  if (isset($config['subject'])) {
-    if ($config['subject'] === '<none>') {
-      return NULL;
-    }
-    else {
-      return $config['subject'];
-    }
-  }
-    
-  $root_mlid = $config['root_mlid'];
-  if ($root_mlid) {
-    $q = db_query($sql = "
-      SELECT
-        m.load_functions, m.to_arg_functions, m.access_callback,
-        m.access_arguments, m.page_callback, m.page_arguments, m.title,
-        m.title_callback, m.title_arguments, m.type, m.description,
-        ml.*
-      FROM
-        {menu_links} ml
-        LEFT JOIN {menu_router} m ON (m.path = ml.router_path)
-      WHERE
-        mlid = %d
-    ", $root_mlid);
-    if ($menu_item = db_fetch_array($q)) {
-      _menu_link_translate($menu_item);
-    }
-  }
-
-  // The tree's title is a menu title, a normal string.
-  if (!$menu_item) {
-    $menu_names = menupoly_get_all_menus();
-    $title = t($menu_names[$config['menu_name']]);
-  }
-  // The tree's title is a menu item with a link.
-  else if ($config['title_link']) {
-    if (!empty($menu_item['in_active_trail'])) {
-      if (!empty($menu_item['localized_options']['attributes']['class'])) {
-        $menu_item['localized_options']['attributes']['class'] .= ' active-trail';
-      }
-      else {
-        $menu_item['localized_options']['attributes']['class'] = 'active-trail';
-      }
-    }
-    $hooks = array();
-    if (!empty($config['delta'])) {
-      $hooks[] = 'menu_item_link__menupoly__'. $config['delta'];
-    }
-    $hooks[] = 'menu_item_link__menupoly__'. str_replace('-', '_', $menu_item['menu_name']);
-    $hooks[] = 'menu_item_link__menupoly';
-    $hooks[] = 'menu_item_link';
-    $title = theme($hooks, $menu_item);
-  }
-  // The tree's title is a menu item.
-  else {
-    $title = check_plain($menu_item['title']);
-  }
-  return $title;
-}
-
-
-function menupoly_get_all_menus() {
-  static $all_menus;
-
-  if (!$all_menus) {
-    // Include book support.
-    if (module_exists('book') && !function_exists('book_get_menus')) {
-      if (module_exists('menu_block')) {
-        module_load_include('inc', 'menu_block', 'menu_block.book');
-      }
-      else {
-        module_load_include('inc', 'menupoly', 'menupoly.book');
-      }
-    }
-    // We're generalizing menu's menu_get_menus() by making it into a hook.
-    // Retrieve all the menu names provided by hook_get_menus().
-    $all_menus = module_invoke_all('get_menus');
-    asort($all_menus);
-  }
-  return $all_menus;
-}
-
-
-function _menupoly_wrap_html($html, $config) {
-  return $html;
-  // TODO: Do something to wrap.
-  if ($html) {
-    $hooks = array();
-    $hooks[] = 'menupoly_wrapper__'. preg_replace('/[^\w\d]/', '_', $config['delta']);
-    $hooks[] = 'menupoly_wrapper__'. str_replace('-', '_', $config['menu_name']);
-    $hooks[] = 'menupoly_wrapper';
-    $html = theme($hooks, $html, $config, $config['delta']);
-  }
-  return $html;
-}
-
-
-function menupoly_get_seeds() {
-  $seeds = array();
-  if (module_exists('crumbs')) {
-    // crumbs can give us an "active trail" of paths.
-    $crumbs_trail = crumbs_get_trail();
-    $seeds = array_reverse(array_keys($crumbs_trail));
-  }
-  else {
-    $item = menu_get_item();
-    if ($item['access']) {
-      $seeds[] = $item['href'];
-      if ($item['tab_root']) {
-        $seeds[] = $item['tab_root'];
-      }
-    }
-  }
-  return $seeds;
-}
-
 
 /**
- * This function is much more innocent than _menu_tree_check_access().
- * It does not actually remove anything,
- * it just sets the $item['access'] to either TRUE or FALSE.
+ * Get a service object from the registry/cache.
+ * Services are lazy-created first time you need them.
+ *
+ * @param string $key
+ *   Identifier of the service within the registry.
+ *   The menupoly_ServiceFactory should have a method with the same name.
  */
-function menupoly_items_check_access(&$items) {
-
-  // Collect node links
-  $node_links = array();
-  foreach ($items as $mlid => &$item) {
-    if ($item['router_path'] === 'node/%') {
-      $nid = substr($item['link_path'], 5);
-      if (is_numeric($nid)) {
-        $node_links[(int)$nid][$mlid] = $mlid;
-      }
-    }
+function menupoly($key = NULL) {
+  static $cache;
+  if (!isset($cache)) {
+    $factory = new menupoly_ServiceFactory();
+    $cache = new menupoly_ServiceCache($factory);
   }
-
-  // Adapted from menu_tree_check_access()
-  if (!empty($node_links)) {
-    $nids = array_keys($node_links);
-    $select = db_select('node', 'n');
-    $select->addField('n', 'nid');
-    $select->condition('n.status', 1);
-    $select->condition('n.nid', $nids, 'IN');
-    $select->addTag('node_access');
-    $nids = $select->execute()->fetchCol();
-    foreach ($nids as $nid) {
-      foreach ($node_links[$nid] as $mlid) {
-        $items[$mlid]['access'] = TRUE;
-      }
-    }
-  }
-
-  // Process all items that are not node links.
-  foreach ($items as $mlid => &$item) {
-    _menu_link_translate($item);
-  }
+  return isset($key) ? $cache->get($key) : $cache;
 }

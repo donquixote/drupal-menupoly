@@ -2,54 +2,56 @@
 
 
 /**
- * Using the {menu_links} db table as a source for menu items.
+ * Builds menu trees from settings arrays,
+ * using the {menu_links} db table as a source for menu items.
+ *
+ * This class is the heart and the most complex part of menupoly.
+ * In previous versions it was split into multiple classes, but this approach
+ * failed at reducing complexity. Maybe this is just the best we can get.
+ *
+ * TODO:
+ *   Find a more convincing way to slice this up.
+ *   We want separate unit-testable pieces!
  */
 class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Interface {
 
-  protected $trailPaths = array();
   protected $trailItems = array();
+  protected $accessChecker;
 
-  function setTrailPaths(array $paths) {
-    $this->trailPaths = $paths;
+  /**
+   * @param menupoly_AccessChecker
+   *   Object that can check access to a bunch of menu items at once.
+   */
+  function __construct($access_checker) {
+    $this->accessChecker = $access_checker;
   }
 
+  function setTrailPaths(array $paths) {
+    $this->trailItems = new menupoly_MenuTreeSource_MenuLinks_TrailItems($paths);
+  }
+
+  /**
+   * Build a menu tree based on an array of settings.
+   *
+   * @param array $settings
+   *   Settings that define the tree.
+   *
+   * @return menupoly_MenuTree
+   *   Tree of menu links, with a render() method.
+   */
   function build(array $settings) {
 
-    $settings += array(
-      'expand' => MENUPOLY_EXPAND_ACTIVE | MENUPOLY_EXPAND_EXPANDED,
-    );
-    // TODO: Validate settings.
-
-    // Determine the root item.
-    $root_item = $this->_fetchRootItem($settings);
-    if ($root_item === FALSE) {
-      return NULL;
+    // Determine the root condition.
+    $root_condition = $this->_dynamicRootCondition($settings);
+    if (FALSE === $root_condition) {
+      // The menu would be empty, so we stop right here.
+      return;
     }
+    $trail_mlids = $this->trailItems->mlids($root_condition);
 
     // Fetch the actual menu items.
     $q = $this->_selectItems();
-    // $q->_applyDepthCondition($root_item, $settings);
-    if ($settings['expand'] === MENUPOLY_EXPAND_ALL) {
-      // Expand the full tree.
-      // Don't add further conditions.
-      $this->_applyRootCondition($q, $root_item, $settings);
-    }
-    else {
-      if ($settings['expand'] & MENUPOLY_EXPAND_ACTIVE) {
-        $plids = $this->_fetchActiveTrailPlids($root_item, $settings);
-      }
-      if (isset($plids)) {
-        $q->condition('plid', $plids);
-        $q->condition('menu_name', $settings['menu_name']);
-      }
-      elseif (!empty($root_item)) {
-        $q->condition('plid', $root_item['mlid']);
-      }
-      else {
-        $q->condition('plid', 0);
-        $q->condition('menu_name', $settings['menu_name']);
-      }
-    }
+    $root_condition->applyFinal($q, $settings, $trail_mlids);
 
     $items = $q->execute()->fetchAllAssoc('mlid', PDO::FETCH_ASSOC);
 
@@ -68,23 +70,17 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
       $this->_expandExpanded($items, $mlids);
     }
 
-    menupoly_items_check_access($items);
+    $this->accessChecker->itemsCheckAccess($items);
 
     // Mark the active trail.
-    if (!isset($plids)) {
-      $plids = $this->_fetchActiveTrailPlids($root_item, $settings);
-    }
-    if (is_array($plids)) {
-      foreach ($plids as $plid) {
-        if (isset($items[$plid])) {
-          $items[$plid]['active-trail'] = TRUE;
-        }
+    foreach ($trail_mlids as $mlid) {
+      if (isset($items[$mlid])) {
+        $items[$mlid]['active-trail'] = TRUE;
       }
     }
 
     // Build the MenuTree object.
-    $root_mlid = !empty($root_item) ? $root_item['mlid'] : 0;
-    $tree = new menupoly_MenuTree($root_mlid);
+    $tree = new menupoly_MenuTree($root_condition->getRootMlid());
     $tree->addItems($items);
     return $tree;
   }
@@ -104,50 +100,33 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     $this->_expandExpanded($items, $plids);
   }
 
-  protected function _fetchActiveTrailPlids($root_item, $settings) {
-    // Determine the active trail.
+  protected function _dynamicRootCondition(array $settings) {
+    $root_condition = $this->_settingsRootCondition($settings);
+    if (FALSE === $root_condition) {
+      return FALSE;
+    }
     if (!empty($settings['follow'])) {
-      return;
+      // Find deepest trail item within the current menu / submenu
+      if ($settings['follow'] === MENUPOLY_FOLLOW_CHILDREN) {
+        $root_item = $this->trailItems->deepest($root_condition);
+      }
+      else {
+        $root_item = $this->trailItems->parentOfDeepest($root_condition);
+      }
+      if (!empty($root_item)) {
+        return new menupoly_MenuTreeSource_MenuLinks_RootCondition_RootItem($root_item);
+      }
     }
-    $deep_trail_item = $this->_fetchDeepestTrailItem($root_item, $settings);
-    if (empty($deep_trail_item)) {
-      return;
+    elseif (!empty($settings['level']) && $settings['level'] > 1) {
+      $root_item = $this->trailItems->withDepth($root_condition, $settings['level'] - 1);
+      if (!empty($root_item)) {
+        return new menupoly_MenuTreeSource_MenuLinks_RootCondition_RootItem($root_item);
+      }
     }
-    $plids = array(0);
-    // TODO: Determine min depth.
-    $min_depth = 1;
-    for ($i = 1; isset($deep_trail_item['p' . $i]); ++$i) {
-      $plids[] = $deep_trail_item['p' . $i];
-    }
-    return $plids;
+    return $root_condition;
   }
 
-  protected function _fetchDeepestTrailItem($root_item, array $settings) {
-    $q = db_select('menu_links', 'ml')->fields('ml');
-    $this->_applyRootCondition($q, $root_item, $settings);
-    $q->condition('link_path', $this->trailPaths);
-    $q->orderBy('depth', 'DESC');
-    $q->range(0, 1);
-    return $q->execute()->fetchAssoc();
-  }
-
-  protected function _fetchRootItem(array $settings) {
-    $root_item = $this->_fetchSettingsRootItem($settings);
-    if (empty($settings['follow'])) {
-      return $root_item;
-    }
-    if (FALSE === $root_item) {
-      return FALSE;
-    }
-    // Find deepest trail item within the current menu / submenu
-    $root_item = $this->_fetchDeepestTrailItem($root_item, $settings);
-    if (empty($root_item)) {
-      return FALSE;
-    }
-    return $root_item;
-  }
-
-  protected function _fetchSettingsRootItem(array $settings) {
+  protected function _settingsRootCondition(array $settings) {
     $q = db_select('menu_links', 'ml')->fields('ml');
     if (!empty($settings['root_mlid'])) {
       $q->condition('mlid', $settings['root_mlid']);
@@ -159,7 +138,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
       return FALSE;
     }
     else {
-      return NULL;
+      return new menupoly_MenuTreeSource_MenuLinks_RootCondition_MenuName($settings['menu_name']);
     }
     $item = $q->execute()->fetchAssoc();
     if (empty($item)) {
@@ -171,19 +150,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     ) {
       return FALSE;
     }
-    return $item;
-  }
-
-  protected function _applyRootCondition($q, $root_item, $settings) {
-    if (!empty($root_item)) {
-      $q->condition('p'. $root_item['depth'], $root_item['mlid']);
-    }
-    elseif (!empty($settings['menu_name'])) {
-      $q->condition('menu_name', $settings['menu_name']);
-    }
-    else {
-      throw new Exception("No root item and no menu name are given.");
-    }
+    return new menupoly_MenuTreeSource_MenuLinks_RootCondition_RootItem($item);
   }
 
   protected function _selectItems() {
