@@ -15,7 +15,7 @@ class menupoly_ModuleInfo {
 
     return array(
       'menupoly' => array(
-        'variables' => array('menupoly' => NULL, 'menupoly_seeds' => NULL),
+        'variables' => array('menupoly' => NULL),
         'pattern' => 'menupoly',
       ),
     );

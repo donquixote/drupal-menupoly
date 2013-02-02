@@ -48,43 +48,8 @@ function menupoly_example_page() {
     'admin_title' => '',
 
     // Tree-building options
-    // which menu to fetch items from
-    'menu_name' => 'main-menu',
-    // root item to constrain the available items
-    'root_mlid' => '0',
-    // 'root_path' => 'some/path',
-    // ??
-    'level' => 1,
-    // ??
-    'follow' => 0,
-    'sort' => 0,
-
-    // depth up to which we expand everything.
-    // 0 means that nothing is shown.
-    // 1 means that only the submenu directly under root is shown.
-    // NULL means no depth limit, all submenus under root are expanded.
-    // Defaults to 0.
-    'depth_all' => 3,
-
-    // depth up to which we expand submenus where the parent is marked as
-    // "expanded". 0, 1 and NULL as above for depth_all.
-    // Defaults to 0 
-    'depth_expanded' => 4,
-
-    // depth up to which we expand streets for seeds.
-    // Defaults to 0.
-    'depth_street' => 5,
-
-    // minimum depth for items, measured from root.
-    // 1: no limit
-    // n: the root will be newly determined depending on active trail.
-    // Defaults to 1.
-    'mindepth' => 0,
-
-    // Legacy depth value. Meaning depends on 'expand' and 'expanded' settings.
-    'depth' => 3,
-    // Legacy value that combines street depth and pyramid depth.
-    'maxdepth' => 5,
+    'menu_name' => 'navigation',
+    'i18n_menu_name_suffix' => TRUE,
     'expand' => MENUPOLY_EXPAND_ALL,
   );
   return menupoly_view($config);
@@ -96,40 +61,83 @@ function menupoly_example_page_2() {
   // Typical top-level "flat" menu.
   $config = array(
     'menu_name' => 'main-menu',
-    'depth_all' => 1,
+    'depth' => 1,
+  );
+
+  // Typical second-level "flat" menu.
+  $config = array(
+    'menu_name' => 'main-menu',
+    'level' => 2,
+    'depth' => 1,
   );
 
   // Typical fully expanded dropdown menu.
   $config = array(
     'menu_name' => 'main-menu',
-    'depth_all' => NULL,
+    'expand' => MENUPOLY_EXPAND_ALL,
+  );
+
+  // Typical fully expanded dropdown menu with i18n menu selection.
+  $config = array(
+    'menu_name' => 'menu-test-nav',
+    // This will replace the menu name with e.g. menu-test-nav-fr, if you browse
+    // in French, and the respective menu exists.
+    'i18n_menu_name_suffix' => TRUE,
+    'expand' => MENUPOLY_EXPAND_ALL,
   );
 
   // Dropdown menu for the current sub-section of the site.
   $config = array(
     'menu_name' => 'main-menu',
-    'depth_all' => NULL,
-    'mindepth' => 2,
+    'expand' => MENUPOLY_EXPAND_ALL,
+    'level' => 2,
   );
 
-  // Typical sidebar menu with submenus for active trail expanded.
+  // Typical sidebar menu, where submenus are expanded if
+  // - the parent is in the active trail, OR
+  // - the parent is marked as "expanded".
   $config = array(
     'menu_name' => 'main-menu',
-    'depth_street' => NULL,
   );
 
-  // Sidebar menu starting at a lower level.
+  // Typical sidebar menu, where submenus are expanded if
+  // - the parent is in the active trail.
   $config = array(
     'menu_name' => 'main-menu',
-    'depth_street' => NULL,
-    'mindepth' => 2,
+    'expand' => MENUPOLY_EXPAND_ACTIVE,
+  );
+
+  // Typical sidebar menu, where submenus are expanded if
+  // - the parent is marked as "expanded".
+  $config = array(
+    'menu_name' => 'main-menu',
+    'expand' => MENUPOLY_EXPAND_EXPANDED,
+  );
+
+  // Sidebar menu starting at second level.
+  $config = array(
+    'menu_name' => 'main-menu',
+    'level' => 2,
   );
 
   // Show "children" of the current page.
   $config = array(
     'menu_name' => 'main-menu',
-    'depth_all' => 1,
-    'follow' => TRUE,
+    'follow' => MENUPOLY_FOLLOW_CHILDREN,
+    'depth' => 1,
+  );
+
+  // Show "siblings" of the current page.
+  $config = array(
+    'menu_name' => 'main-menu',
+    'follow' => MENUPOLY_FOLLOW_SIBLINGS,
+    'depth' => 1,
+  );
+
+  // Show the submenu tree under 'node/123'
+  $config = array(
+    'menu_name' => 'main-menu',
+    'parent_path' => 'node/123',
   );
 }
 
