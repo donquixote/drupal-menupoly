@@ -124,6 +124,9 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
       if (!empty($root_item)) {
         return new menupoly_MenuTreeSource_MenuLinks_RootCondition_RootItem($root_item);
       }
+      else {
+        return FALSE;
+      }
     }
     return $root_condition;
   }
