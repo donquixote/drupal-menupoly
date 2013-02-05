@@ -41,6 +41,12 @@ function menupoly_example_menu() {
       'access arguments' => array('administer site configuration'),
       'title' => 'Menupoly example 2',
     ),
+    'admin/structure/menu/menupoly/example2/%' => array(
+      'page callback' => 'menupoly_example_page_2',
+      'page arguments' => array(5),
+      'access arguments' => array('administer site configuration'),
+      'title' => 'Menupoly example 2',
+    ),
   );
 }
 
@@ -61,7 +67,7 @@ function menupoly_example_page() {
 }
 
 
-function menupoly_example_page_2() {
+function menupoly_example_page_2($index = 0) {
 
   // Typical top-level "flat" menu.
   $variations[] = array(
@@ -145,19 +151,22 @@ function menupoly_example_page_2() {
     'parent_path' => 'node/123',
   );
 
-  $n = count($variations) - 1;
-  $i = (int)@$_GET['variation'];
-  $v = $variations[$i];
-  $text = t("Choose a number from 0 to $n");
-  $pre = print_r($v, TRUE);
-  $html = <<<EOT
-<form method="GET">
-  <p>$text</p>
-  <input type="text" class="form-text" name="variation" />
-</form>
-<code><pre>$pre</pre></code>
-EOT;
-  return $html . menupoly_view($v);
+  $n = count($variations);
+  $links = array();
+  foreach ($variations as $i => $variation) {
+    if ($i === (int)$index) {
+      $links[] = '<strong>' . $i . '</strong>';
+    }
+    else {
+      $links[] = l($i, 'admin/structure/menu/menupoly/example2/' . $i);
+    }
+  }
+  $html = '<p>Choose one: ' . implode(' ', $links) . '</p>';
+
+  $v = $variations[$index];
+  $html .= '<code><pre>' . print_r($v, TRUE) . '</pre></code>';
+  $html .= menupoly_view($v);
+  return $html;
 }
 
 
