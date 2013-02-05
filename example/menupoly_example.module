@@ -27,7 +27,9 @@ function menupoly_example_menupoly() {
   );
 }
 
-
+/**
+ * Implements hook_menu()
+ */
 function menupoly_example_menu() {
 
   return array(
@@ -50,7 +52,9 @@ function menupoly_example_menu() {
   );
 }
 
-
+/**
+ * Page callback for admin/structure/menu/menupoly/example
+ */
 function menupoly_example_page() {
   $config = array(
     // Block options
@@ -66,13 +70,22 @@ function menupoly_example_page() {
   return menupoly_view($config);
 }
 
-
+/**
+ * Page callback for admin/structure/menu/menupoly/example2(/%)
+ */
 function menupoly_example_page_2($index = 0) {
 
   // Typical top-level "flat" menu.
   $variations[] = array(
     'menu_name' => 'main-menu',
     'depth' => 1,
+  );
+
+  // Top-level "flat" menu with a dedicated menu theme.
+  $variations[] = array(
+    'menu_name' => 'main-menu',
+    'depth' => 1,
+    'menu_theme' => new menupoly_example_MenuTheme_FlatLinksWithSeparator(' | '),
   );
 
   // Typical second-level "flat" menu.
