@@ -23,7 +23,7 @@ class menupoly_ServiceFactory {
    * @return menupoly_AccessChecker
    *   Object which can check access for menu items.
    */
-  function get_access($cache) {
+  function get_accessChecker($cache) {
     return new menupoly_AccessChecker();
   }
 
@@ -46,7 +46,7 @@ class menupoly_ServiceFactory {
   function call_1_menuTreeSource($cache, $type) {
     switch ($type) {
       case 'menu_links':
-        $source = new menupoly_MenuTreeSource_MenuLinks($cache->access);
+        $source = new menupoly_MenuTreeSource_MenuLinks();
         $source->setTrailPaths($cache->trailPaths);
         return $source;
     }

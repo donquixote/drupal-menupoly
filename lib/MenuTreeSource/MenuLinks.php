@@ -16,15 +16,6 @@
 class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Interface {
 
   protected $trailItems = array();
-  protected $accessChecker;
-
-  /**
-   * @param menupoly_AccessChecker
-   *   Object that can check access to a bunch of menu items at once.
-   */
-  function __construct($access_checker) {
-    $this->accessChecker = $access_checker;
-  }
 
   function setTrailPaths(array $paths) {
     $this->trailItems = new menupoly_MenuTreeSource_MenuLinks_TrailItems($paths);
@@ -70,8 +61,6 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
       $this->_expandExpanded($items, $mlids);
     }
 
-    $this->accessChecker->itemsCheckAccess($items);
-
     // Mark the active trail.
     foreach ($trail_mlids as $mlid) {
       if (isset($items[$mlid])) {
@@ -79,10 +68,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
       }
     }
 
-    // Build the MenuTree object.
-    $tree = new menupoly_MenuTree($root_condition->getRootMlid());
-    $tree->addItems($items);
-    return $tree;
+    return array($root_condition->getRootMlid(), $items);
   }
 
   protected function _expandExpanded(&$items, array $plids) {
