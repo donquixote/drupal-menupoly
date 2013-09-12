@@ -80,10 +80,10 @@ class menupoly_MenuTree {
         $options = $item['localized_options'];
         $options = is_array($options) ? $options : array();
         $subtree_html = $this->renderSubmenu($theme, $mlid, $depth + 1);
-        $pieces[$k] = $theme->renderMenuItem($item, $options, $subtree_html);
+        $pieces[$k] = $theme->renderMenuItem($item, $options, $subtree_html, $depth);
       }
       if (!empty($pieces)) {
-        return $theme->renderMenuTree($pieces);
+        return $theme->renderMenuTree($pieces, $depth);
       }
     }
     return '';
