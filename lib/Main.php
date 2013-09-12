@@ -47,7 +47,6 @@ class menupoly_Main {
       $html = $tree->render($menu_theme);
       return $html;
     }
-
   }
 
   /**
