@@ -37,7 +37,8 @@ function menupoly_block_view($delta = '') {
  *   Rendered HTML.
  */
 function menupoly_view(array $settings) {
-  return menupoly('main')->settingsToHtml($settings);
+  $render_array = menupoly('main')->settingsToRenderArray($settings);
+  return render($render_array);
 }
 
 /**
@@ -45,6 +46,18 @@ function menupoly_view(array $settings) {
  */
 function theme_menupoly(array $vars) {
   return menupoly('main')->settingsToHtml($vars['menupoly']);
+}
+
+/**
+ * Implements hook_preprocess_menupoly()
+ */
+function menupoly_preprocess_menupoly(&$vars) {
+  if (!empty($vars['menupoly']['menu_theme'])) {
+    $menu_theme = $vars['menupoly']['menu_theme'];
+    if (method_exists($menu_theme, 'preprocess')) {
+      $menu_theme->preprocess($vars);
+    }
+  }
 }
 
 /**
