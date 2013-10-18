@@ -72,7 +72,7 @@ class menupoly_MenuTree {
       foreach ($submenu_sorted as $k => $mlid) {
         $items[$k] = $this->_items[$mlid];
       }
-      $theme->processSubmenuItems($items);
+      $theme->processSubmenuItems($items, $depth);
 
       $pieces = array();
       foreach ($items as $k => $item) {
