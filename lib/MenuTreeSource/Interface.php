@@ -4,6 +4,10 @@
  * A MenuTreeSource is an object reprenting a persistent structure that can
  * provide menu trees, and an "active trail" of paths that make some of these
  * menu items special.
+ *
+ * Usage:
+ * - Use $source->setTrailPaths() to set the active trail.
+ * - Use $source->build($settings) to load menu tree items and root mlid.
  */
 interface menupoly_MenuTreeSource_Interface {
 
