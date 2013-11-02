@@ -3,12 +3,27 @@
 
 class menupoly_MenuTreeSource_MenuLinks_TrailItems {
 
+  /**
+   * @var array
+   *   Paths in the "active trail".
+   */
   protected $trailPaths;
 
+  /**
+   * @param array $trail_paths
+   *   Paths in the "active trail".
+   */
   function __construct($trail_paths) {
     $this->trailPaths = $trail_paths;
   }
 
+  /**
+   * @param object $root_condition
+   *   Condition to be applied to all queries.
+   *
+   * @return array
+   *   Mlids for "active trail" items that match the root condition.
+   */
   function mlids($root_condition) {
     $deep_trail_item = $this->deepest($root_condition);
     if (empty($deep_trail_item)) {
@@ -26,6 +41,12 @@ class menupoly_MenuTreeSource_MenuLinks_TrailItems {
    * returns the one where
    * - the path is th deepest within the active trail paths
    * - the depth of the menu link is highest
+   *
+   * @param boolean|object $root_condition
+   *   Condition to apply to all queries.
+   *
+   * @return array
+   *   Deepest menu link in active trail.
    */
   function deepest($root_condition) {
     $mlid = $this->fetchDeepest($root_condition, 'mlid');
@@ -35,6 +56,12 @@ class menupoly_MenuTreeSource_MenuLinks_TrailItems {
 
   /**
    * Same as above, but returns the parent of this item.
+   *
+   * @param boolean|object $root_condition
+   *   Condition to apply to all queries.
+   *
+   * @return array
+   *   Parent of deepest menu link in active trail.
    */
   function parentOfDeepest($root_condition) {
     $mlid = $this->fetchDeepest($root_condition, 'plid');
@@ -47,12 +74,27 @@ class menupoly_MenuTreeSource_MenuLinks_TrailItems {
    * returns the one where
    * - the path is th deepest within the active trail paths
    * - the depth is exactly as $depth.
+   *
+   * @param boolean|object $root_condition
+   *   Condition to apply to all queries.
+   *
+   * @return array
+   *   Parent of deepest menu link in active trail.
    */
   function withDepth($root_condition, $depth) {
     $mlid = $this->fetchDeepest($root_condition, 'mlid', $depth);
     return $this->fetchLink($mlid);
   }
 
+  /**
+   * @param boolean|object $root_condition
+   *   Condition to apply to all queries.
+   * @param string $field
+   * @param int|NULL $depth
+   *
+   * @return int|string|NULL
+   *   Mlid of deepest trail item.
+   */
   protected function fetchDeepest($root_condition, $field, $depth = NULL) {
     $q = db_select('menu_links', 'ml')->fields('ml', array('link_path', $field));
     $root_condition->apply($q);
@@ -74,6 +116,13 @@ class menupoly_MenuTreeSource_MenuLinks_TrailItems {
     }
   }
 
+  /**
+   * @param int|string $mlid
+   *   The mlid to fetch the link for.
+   *
+   * @return array|NULL
+   *   Menu link with that mlid.
+   */
   protected function fetchLink($mlid) {
     if (!empty($mlid)) {
       $q = db_select('menu_links', 'ml')->fields('ml');

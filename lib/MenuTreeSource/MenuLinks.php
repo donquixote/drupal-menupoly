@@ -15,20 +15,22 @@
  */
 class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Interface {
 
+  /**
+   * @var array|object
+   *   Items in the "active trail".
+   *   @todo: This needs documentation.
+   */
   protected $trailItems = array();
 
+  /**
+   * {@inheritdoc}
+   */
   function setTrailPaths(array $paths) {
     $this->trailItems = new menupoly_MenuTreeSource_MenuLinks_TrailItems($paths);
   }
 
   /**
-   * Build a menu tree based on an array of settings.
-   *
-   * @param array $settings
-   *   Settings that define the tree.
-   *
-   * @return menupoly_MenuTree
-   *   Tree of menu links, with a render() method.
+   * {@inheritdoc}
    */
   function build(array $settings) {
 
@@ -71,6 +73,16 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     return array($root_condition->getRootMlid(), $items);
   }
 
+  /**
+   * Load submenu items for expanded items, recursively.
+   * This only happens in case of MENUPOLY_EXPAND_EXPANDED.
+   *
+   * @param array &$items
+   *   Items array to grow.
+   *
+   * @param array $plids
+   *   plids for the current recursion step.
+   */
   protected function _expandExpanded(&$items, array $plids) {
     $expanded_mlids = array();
     foreach ($plids as $k => $plid) {
@@ -88,12 +100,26 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     }
   }
 
+  /**
+   * Build a root condition to be applied to all queries.
+   * The effect is generally that only the sub-tree under a specific plid is
+   * being loaded.
+   * This may be based on a static root plid, or a dynamic root plid depending
+   * on the active trail.
+   *
+   * @param array $settings
+   *   Settings array.
+   *
+   * @return bool|object
+   *   Root condition to be applied to all queries.
+   */
   protected function _dynamicRootCondition(array $settings) {
     $root_condition = $this->_settingsRootCondition($settings);
     if (FALSE === $root_condition) {
       return FALSE;
     }
     if (!empty($settings['follow'])) {
+      // Root item to follow the active page.
       // Find deepest trail item within the current menu / submenu
       if ($settings['follow'] === MENUPOLY_FOLLOW_CHILDREN) {
         $root_item = $this->trailItems->deepest($root_condition);
@@ -106,6 +132,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
       }
     }
     elseif (!empty($settings['level']) && $settings['level'] > 1) {
+      // Root item at a specified level.
       $root_item = $this->trailItems->withDepth($root_condition, $settings['level'] - 1);
       if (!empty($root_item)) {
         return new menupoly_MenuTreeSource_MenuLinks_RootCondition_RootItem($root_item);
@@ -117,6 +144,13 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     return $root_condition;
   }
 
+  /**
+   * @param array $settings
+   *   Settings array.
+   *
+   * @return bool|object
+   *   Root condition to apply to all queries, based on settings array.
+   */
   protected function _settingsRootCondition(array $settings) {
     $q = db_select('menu_links', 'ml')->fields('ml');
     if (!empty($settings['root_mlid'])) {
@@ -144,6 +178,12 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     return new menupoly_MenuTreeSource_MenuLinks_RootCondition_RootItem($item);
   }
 
+  /**
+   * @return SelectQueryInterface
+   *   Select query for menu_links joined with menu_router.
+   *   Hidden items are filtered out.
+   *   Results ordered by trail.
+   */
   protected function _selectItems() {
     $q = $this->_selectMenuLinks()->fields('ml');
     $q->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
@@ -158,6 +198,12 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     return $q;
   }
 
+  /**
+   * @return SelectQueryInterface
+   *   Select query for menu_links table.
+   *   Hidden items are filtered out.
+   *   The query does not contain any fields yet.
+   */
   protected function _selectMenuLinks() {
     $q = db_select('menu_links', 'ml');
     $q->condition('hidden', 1, '!=');

@@ -35,6 +35,10 @@ class menupoly_ServiceFactory {
     return new menupoly_Main($cache);
   }
 
+  /**
+   * @return menupoly_SettingsProcessor
+   *   Settings processor..
+   */
   function get_settingsProcessor($cache) {
     return new menupoly_SettingsProcessor();
   }

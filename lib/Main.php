@@ -2,6 +2,10 @@
 
 class menupoly_Main {
 
+  /**
+   * @var menupoly_ServiceCache
+   *   Object which provides lazy-created service objects.
+   */
   protected $services;
 
   /**
@@ -55,8 +59,10 @@ class menupoly_Main {
    */
   function settingsToMenuTree($settings) {
 
+    // Normalize the settings array.
     $this->services->settingsProcessor->processSettings($settings);
 
+    // Create a MenuTreeSource object based on 'menu_links'.
     $source = $this->services->menuTreeSource('menu_links');
     if (!is_object($source)) {
       throw new Exception("Source must be an object.");
