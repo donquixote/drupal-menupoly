@@ -6,6 +6,11 @@
  */
 abstract class menupoly_MenuTheme_Abstract implements menupoly_MenuTheme_Interface {
 
+  /**
+   * Add first/last and odd/even classes.
+   *
+   * {@inheritdoc}
+   */
   function processSubmenuItems(&$items) {
     $i = 0;
     $n = count($items);
