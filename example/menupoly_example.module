@@ -101,6 +101,13 @@ function menupoly_example_page_2($index = 0) {
     'expand' => MENUPOLY_EXPAND_ALL,
   );
 
+  // Typical fully expanded dropdown menu, with items filtered by language.
+  $variations[] = array(
+    'menu_name' => 'main-menu',
+    'expand' => MENUPOLY_EXPAND_ALL,
+    'filter_by_language' => array('current', LANGUAGE_NONE),
+  );
+
   // Typical fully expanded dropdown menu with i18n menu selection.
   $variations[] = array(
     'menu_name' => 'menu-test-nav',

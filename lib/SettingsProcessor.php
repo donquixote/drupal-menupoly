@@ -18,7 +18,31 @@ class menupoly_SettingsProcessor {
 
     $settings += array(
       'expand' => MENUPOLY_EXPAND_ACTIVE | MENUPOLY_EXPAND_EXPANDED,
+      'filter_by_language' => FALSE,
     );
+
+    // Normalize the "filter by language".
+    $languages = language_list();
+    if (TRUE === $settings['filter_by_language']) {
+      // Shortcut for "current language and language neutral".
+      $settings['filter_by_language'] = array($GLOBALS['language']->language, LANGUAGE_NONE);
+    }
+    elseif (is_array($settings['filter_by_language'])) {
+      foreach ($settings['filter_by_language'] as $key => $language) {
+        if ('current' === $language) {
+          // Resolve "current" language.
+          $settings['filter_by_language'][$key] = $GLOBALS['language']->language;
+        }
+        elseif (LANGUAGE_NONE === $language) {
+          // Do nothing.
+        }
+        elseif (!isset($languages[$language])) {
+          // Invalid language code.
+          unset($settings['filter_by_language'][$key]);
+        }
+      }
+      $settings['filter_by_language'] = array_unique($settings['filter_by_language']);
+    }
   }
 
   /**

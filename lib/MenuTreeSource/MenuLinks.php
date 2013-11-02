@@ -43,7 +43,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     $trail_mlids = $this->trailItems->mlids($root_condition);
 
     // Fetch the actual menu items.
-    $q = $this->_selectItems();
+    $q = $this->_selectItems($settings['filter_by_language']);
     $root_condition->applyFinal($q, $settings, $trail_mlids);
 
     $items = $q->execute()->fetchAllAssoc('mlid', PDO::FETCH_ASSOC);
@@ -60,7 +60,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
           unset($mlids[$plid]);
         }
       }
-      $this->_expandExpanded($items, $mlids);
+      $this->_expandExpanded($items, $mlids, $settings['filter_by_language']);
     }
 
     // Mark the active trail.
@@ -79,11 +79,12 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
    *
    * @param array &$items
    *   Items array to grow.
-   *
    * @param array $plids
    *   plids for the current recursion step.
+   * @param array|bool $filter_by_language
+   *   Allowed languages for menu items.
    */
-  protected function _expandExpanded(&$items, array $plids) {
+  protected function _expandExpanded(&$items, array $plids, $filter_by_language = FALSE) {
     $expanded_mlids = array();
     foreach ($plids as $k => $plid) {
       if (empty($items[$plid]['expanded'])) {
@@ -91,7 +92,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
       }
     }
     if (!empty($plids)) {
-      $q = $this->_selectItems();
+      $q = $this->_selectItems($filter_by_language);
       $q->condition('plid', $plids);
       $items_new = $q->execute()->fetchAllAssoc('mlid', PDO::FETCH_ASSOC);
       $plids = array_keys($items_new);
@@ -179,12 +180,15 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
   }
 
   /**
+   * @param array|bool $filter_by_language
+   *   Allowed languages for menu items.
+   *
    * @return SelectQueryInterface
    *   Select query for menu_links joined with menu_router.
    *   Hidden items are filtered out.
    *   Results ordered by trail.
    */
-  protected function _selectItems() {
+  protected function _selectItems($filter_by_language = FALSE) {
     $q = $this->_selectMenuLinks()->fields('ml');
     $q->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
     $q->fields('m', array(
@@ -192,6 +196,9 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
       'access_arguments', 'page_callback', 'page_arguments', 'title',
       'title_callback', 'title_arguments', 'type', 'description',
     ));
+    if (is_array($filter_by_language)) {
+      $q->condition('ml.language', $filter_by_language, 'IN');
+    }
     for ($i = 1; $i <= 9; ++$i) {
       $q->orderBy("p$i", 'ASC');
     }
