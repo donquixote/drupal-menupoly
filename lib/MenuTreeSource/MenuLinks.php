@@ -110,7 +110,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
    * @param array $settings
    *   Settings array.
    *
-   * @return bool|object
+   * @return bool|menupoly_MenuTreeSource_MenuLinks_RootCondition_Interface
    *   Root condition to be applied to all queries.
    */
   protected function _dynamicRootCondition(array $settings) {
@@ -148,7 +148,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
    * @param array $settings
    *   Settings array.
    *
-   * @return bool|object
+   * @return bool|menupoly_MenuTreeSource_MenuLinks_RootCondition_Interface
    *   Root condition to apply to all queries, based on settings array.
    */
   protected function _settingsRootCondition(array $settings) {

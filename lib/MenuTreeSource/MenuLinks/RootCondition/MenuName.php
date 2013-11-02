@@ -1,17 +1,34 @@
 <?php
 
-class menupoly_MenuTreeSource_MenuLinks_RootCondition_MenuName {
+/**
+ * A condition to filter a select query on menu_links by menu name.
+ */
+class menupoly_MenuTreeSource_MenuLinks_RootCondition_MenuName implements menupoly_MenuTreeSource_MenuLinks_RootCondition_Interface {
 
+  /**
+   * @var string
+   *   Machine name of a menu.
+   */
   protected $menuName;
 
+  /**
+   * @param string $menu_name
+   *   Machine name of a menu.
+   */
   function __construct($menu_name) {
     $this->menuName = $menu_name;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function apply($q) {
     $q->condition('menu_name', $this->menuName);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function applyFinal($q, $settings, $trail_mlids) {
     $maxdepth = $depth = isset($settings['depth']) ? $settings['depth'] : NULL;
     $q->condition('menu_name', $this->menuName);
@@ -34,6 +51,9 @@ class menupoly_MenuTreeSource_MenuLinks_RootCondition_MenuName {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function getRootMlid() {
     return 0;
   }
