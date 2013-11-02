@@ -69,6 +69,9 @@ class menupoly_Main {
     }
 
     list($root_mlid, $items) = $source->build($settings);
+    if (empty($items)) {
+      return;
+    }
 
     $this->services->accessChecker->itemsCheckAccess($items);
 

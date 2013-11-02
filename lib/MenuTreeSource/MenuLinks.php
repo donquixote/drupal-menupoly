@@ -38,7 +38,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
     $root_condition = $this->_dynamicRootCondition($settings);
     if (FALSE === $root_condition) {
       // The menu would be empty, so we stop right here.
-      return;
+      return array(0, array());
     }
     $trail_mlids = $this->trailItems->mlids($root_condition);
 
