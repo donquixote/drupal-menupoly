@@ -132,11 +132,23 @@ class menupoly_MenuTree {
    */
   protected function renderSubmenu($theme, $parent_mlid, $depth) {
     $html = '';
-    $submenu = @$this->_submenus[$parent_mlid];
+    if (!isset($this->_submenus[$parent_mlid])) {
+      return '';
+    }
+    $submenu = $this->_submenus[$parent_mlid];
     if (is_object($submenu)) {
+      // Submenu is a "plugin".
+      if (!method_exists($submenu, 'render')) {
+        // @todo Provide an interface for this.
+        throw new Exception("If submenu is an object, it must implement the render() method.");
+      }
       return $submenu->render($this);
     }
-    else if (is_array($submenu)) {
+    elseif (!is_array($submenu)) {
+      throw new Exception("Submenu must be an array or an object.");
+    }
+    else {
+      // Submenu is an array.
       $submenu_sorted = array();
       $sort = array();
       foreach ($submenu as $k => $mlid) {
@@ -163,10 +175,13 @@ class menupoly_MenuTree {
         $subtree_html = $this->renderSubmenu($theme, $mlid, $depth + 1);
         $pieces[$k] = $theme->renderMenuItem($item, $options, $subtree_html, $depth);
       }
+
       if (!empty($pieces)) {
         return $theme->renderMenuTree($pieces, $depth);
       }
     }
+
+    // Menu is empty.
     return '';
   }
 
