@@ -61,6 +61,26 @@ function menupoly_preprocess_menupoly(&$vars) {
 }
 
 /**
+ * Implements hook_menupoly()
+ *
+ * This is used to define two of the most frequently used blocks:
+ * - a top-level dropdown menu
+ * - a level-1 sidebar menu.
+ */
+function menupoly_menupoly() {
+  $menu_name = variable_get('menu_main_links_source', 'main-menu');
+  if (empty($menu_name)) {
+    return;
+  }
+  return array(
+    'topnav' => array(
+      'menu_name' => $menu_name,
+      'expand' => MENUPOLY_EXPAND_ALL,
+    ),
+  );
+}
+
+/**
  * Get a service object from the registry/cache.
  * Services are lazy-created first time you need them.
  *
