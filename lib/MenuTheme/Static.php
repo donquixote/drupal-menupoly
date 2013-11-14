@@ -51,8 +51,6 @@ class menupoly_MenuTheme_Static extends menupoly_MenuTheme_Abstract {
    * {@inheritdoc}
    */
   function renderMenuTree($items_html) {
-    $items_html = implode('', $items_html);
-    $attributes = htmltag_class_attribute('menu');
-    return $attributes->renderTag('ul', $items_html);
+    return '<ul class="menu">' . implode('', $items_html) . '</ul>';
   }
 }
