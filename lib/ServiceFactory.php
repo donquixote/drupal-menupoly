@@ -1,9 +1,10 @@
 <?php
 
-
 class menupoly_ServiceFactory {
 
   /**
+   * @param menupoly_ServiceCache $cache
+   *
    * @return menupoly_ModuleInfo
    *   Object with hook implementations
    */
@@ -12,6 +13,8 @@ class menupoly_ServiceFactory {
   }
 
   /**
+   * @param menupoly_ServiceCache $cache
+   *
    * @return menupoly_BlockInfo
    *   Object with hook_block_info() and hook_block_view() implementations
    */
@@ -20,6 +23,8 @@ class menupoly_ServiceFactory {
   }
 
   /**
+   * @param menupoly_ServiceCache $cache
+   *
    * @return menupoly_AccessChecker
    *   Object which can check access for menu items.
    */
@@ -28,6 +33,8 @@ class menupoly_ServiceFactory {
   }
 
   /**
+   * @param menupoly_ServiceCache $cache
+   *
    * @return menupoly_Main
    *   Object with methods for the main public API.
    */
@@ -36,6 +43,8 @@ class menupoly_ServiceFactory {
   }
 
   /**
+   * @param menupoly_ServiceCache $cache
+   *
    * @return menupoly_SettingsProcessor
    *   Settings processor..
    */
@@ -44,6 +53,9 @@ class menupoly_ServiceFactory {
   }
 
   /**
+   * @param menupoly_ServiceCache $cache
+   * @param string $type
+   *
    * @return menupoly_MenuTreeSource_Interface
    *   Object that can create menu trees
    */
@@ -58,6 +70,8 @@ class menupoly_ServiceFactory {
 
   /**
    * Paths to determine the "active trail".
+   *
+   * @param menupoly_ServiceCache $cache
    *
    * @return array
    *   Paths for the active trail, starting with the current page, and moving up
