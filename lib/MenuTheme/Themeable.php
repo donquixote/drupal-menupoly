@@ -24,7 +24,7 @@ class menupoly_MenuTheme_Themeable extends menupoly_MenuTheme_Abstract {
   /**
    * {@inheritdoc}
    */
-  function renderMenuTree($items_html, $attributes) {
+  function renderMenuTree($items_html) {
     $items_html = implode('', $items_html);
     return theme('menu_tree', $items_html);
   }
