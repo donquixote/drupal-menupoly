@@ -135,7 +135,7 @@ class menupoly_MenuTree {
    *   Rendered HTML code for this submenu.
    */
   protected function renderSubmenu($theme, $parent_mlid, $depth) {
-    $html = '';
+
     if (!isset($this->_submenus[$parent_mlid])) {
       return '';
     }

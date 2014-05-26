@@ -85,7 +85,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
    *   Allowed languages for menu items.
    */
   protected function _expandExpanded(&$items, array $plids, $filter_by_language = FALSE) {
-    $expanded_mlids = array();
+
     foreach ($plids as $k => $plid) {
       if (empty($items[$plid]['expanded'])) {
         unset($plids[$k]);

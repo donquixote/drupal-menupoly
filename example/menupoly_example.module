@@ -171,7 +171,6 @@ function menupoly_example_page_2($index = 0) {
     'parent_path' => 'node/123',
   );
 
-  $n = count($variations);
   $links = array();
   foreach ($variations as $i => $variation) {
     if ($i === (int)$index) {
