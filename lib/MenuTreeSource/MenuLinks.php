@@ -183,7 +183,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
    * @param array|bool $filter_by_language
    *   Allowed languages for menu items.
    *
-   * @return SelectQueryInterface
+   * @return SelectQuery
    *   Select query for menu_links joined with menu_router.
    *   Hidden items are filtered out.
    *   Results ordered by trail.
@@ -206,7 +206,7 @@ class menupoly_MenuTreeSource_MenuLinks implements menupoly_MenuTreeSource_Inter
   }
 
   /**
-   * @return SelectQueryInterface
+   * @return SelectQuery
    *   Select query for menu_links table.
    *   Hidden items are filtered out.
    *   The query does not contain any fields yet.
