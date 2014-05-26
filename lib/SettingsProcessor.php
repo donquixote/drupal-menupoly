@@ -64,6 +64,13 @@ class menupoly_SettingsProcessor {
 
   /**
    * Dynamically determine the menu name.
+   *
+   * @param array $settings
+   *
+   * @return string
+   *   The menu name, if found.
+   *
+   * @throws Exception
    */
   function settingsResolveMenuName($settings) {
     if (empty($settings['menu_name'])) {
