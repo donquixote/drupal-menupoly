@@ -39,11 +39,9 @@ class menupoly_ServiceCache {
   }
 
   /**
-   * @param string $method
-   * @param mixed[] $args
+   * @param string $type
    *
-   * @return object
-   * @throws Exception
+   * @return menupoly_MenuTreeSource_Interface
    */
   function __call($method, $args) {
     $key = serialize(array($method, $args));

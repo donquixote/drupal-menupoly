@@ -78,6 +78,8 @@ class menupoly_MenuTreeSource_MenuLinks_TrailItems {
    * @param boolean|object $root_condition
    *   Condition to apply to all queries.
    *
+   * @param int $depth
+   *
    * @return array
    *   Parent of deepest menu link in active trail.
    */

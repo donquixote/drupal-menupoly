@@ -83,6 +83,13 @@ class menupoly_SettingsProcessor {
     }
   }
 
+  /**
+   * Check if a menu exists.
+   *
+   * @param string $menu_name
+   *
+   * @return bool
+   */
   protected function _menuExists($menu_name) {
     return FALSE !== menu_load($menu_name);
   }

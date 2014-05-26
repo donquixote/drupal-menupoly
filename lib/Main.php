@@ -53,6 +53,7 @@ class menupoly_Main {
    * @param array $settings
    *   Array of settings that define a menu tree.
    *
+   * @throws Exception
    * @return menupoly_MenuTree
    *   Menu tree object, ready to render itself.
    */

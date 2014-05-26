@@ -121,12 +121,13 @@ class menupoly_MenuTree {
    *
    * @param menupoly_MenuTheme_Interface $theme
    *   Object with methods to render various parts of the menu.
-   *   @todo: This should not be optional!
    * @param int|string $parent_mlid
    *   Parent mlid identifying the submenu.
    * @param int $depth
    *   Depth of the submenu relative to the root item.
    *
+   * @throws Exception
+   * @todo: This should not be optional!
    * @return string
    *   Rendered HTML code for this submenu.
    */

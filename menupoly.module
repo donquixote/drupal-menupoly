@@ -87,6 +87,8 @@ function menupoly_menupoly() {
  * @param string $key
  *   Identifier of the service within the registry.
  *   The menupoly_ServiceFactory should have a method with the same name.
+ *
+ * @return menupoly_ServiceCache|mixed
  */
 function menupoly($key = NULL) {
   static $cache;

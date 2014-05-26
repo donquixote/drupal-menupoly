@@ -2,6 +2,12 @@
 
 class menupoly_ModuleInfo {
 
+  /**
+   * @param array &$existing
+   *
+   * @return array[]
+   *   Theme hook definitions.
+   */
   function hook_theme(&$existing) {
 
     // Add theme hook suggestion patterns for the core theme functions used in
