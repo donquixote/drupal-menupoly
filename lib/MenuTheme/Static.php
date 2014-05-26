@@ -26,6 +26,8 @@ class menupoly_MenuTheme_Static extends menupoly_MenuTheme_Abstract {
   }
 
   /**
+   * Builds the html tag attributes for an LI menu item.
+   *
    * @param array $item
    * @param array $options
    * @param string $submenu_html

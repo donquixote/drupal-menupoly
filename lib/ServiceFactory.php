@@ -56,6 +56,7 @@ class menupoly_ServiceFactory {
    * @param menupoly_ServiceCache $cache
    * @param string $type
    *
+   * @throws Exception
    * @return menupoly_MenuTreeSource_Interface
    *   Object that can create menu trees
    */
