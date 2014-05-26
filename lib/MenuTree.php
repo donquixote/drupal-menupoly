@@ -80,8 +80,8 @@ class menupoly_MenuTree {
    *
    * @param int|string $parent_mlid
    *   Parent mlid identifying the submenu.
-   * @return array
-   *   Sorted menu items for this submenu.
+   * @return array|null
+   *   Sorted menu items for this submenu, or NULL if empty.
    */
   function getSubmenuItems($parent_mlid) {
     $submenu = $this->_submenus[$parent_mlid];
@@ -100,6 +100,9 @@ class menupoly_MenuTree {
       }
       array_multisort($sort, $submenu_sorted);
       return $submenu_sorted;
+    }
+    else {
+      return NULL;
     }
   }
 

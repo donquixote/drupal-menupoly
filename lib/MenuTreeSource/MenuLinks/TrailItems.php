@@ -94,8 +94,8 @@ class menupoly_MenuTreeSource_MenuLinks_TrailItems {
    * @param string $field
    * @param int|NULL $depth
    *
-   * @return int|string|NULL
-   *   Mlid of deepest trail item.
+   * @return int|string|null
+   *   Mlid of deepest trail item, or NULL if none found.
    */
   protected function fetchDeepest($root_condition, $field, $depth = NULL) {
     $q = db_select('menu_links', 'ml')->fields('ml', array('link_path', $field));
@@ -116,6 +116,7 @@ class menupoly_MenuTreeSource_MenuLinks_TrailItems {
         return $sorted[$path];
       }
     }
+    return NULL;
   }
 
   /**

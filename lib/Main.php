@@ -34,8 +34,8 @@ class menupoly_Main {
    * @param array $settings
    *   Array of settings that define a menu tree.
    *
-   * @return string
-   *   Rendered HTML
+   * @return string|null
+   *   Rendered HTML, or NULL if empty.
    */
   function settingsToHtml($settings) {
 
@@ -47,6 +47,8 @@ class menupoly_Main {
       $html = $tree->render($menu_theme);
       return $html;
     }
+
+    return NULL;
   }
 
   /**
@@ -54,8 +56,8 @@ class menupoly_Main {
    *   Array of settings that define a menu tree.
    *
    * @throws Exception
-   * @return menupoly_MenuTree
-   *   Menu tree object, ready to render itself.
+   * @return menupoly_MenuTree|null
+   *   Menu tree object, ready to render itself, or NULL if empty.
    */
   function settingsToMenuTree($settings) {
 
@@ -70,7 +72,7 @@ class menupoly_Main {
 
     list($root_mlid, $items) = $source->build($settings);
     if (empty($items)) {
-      return;
+      return NULL;
     }
 
     $this->services->accessChecker->itemsCheckAccess($items);

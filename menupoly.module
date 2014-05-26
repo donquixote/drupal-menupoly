@@ -70,7 +70,8 @@ function menupoly_preprocess_menupoly(&$vars) {
 function menupoly_menupoly() {
   $menu_name = variable_get('menu_main_links_source', 'main-menu');
   if (empty($menu_name)) {
-    return;
+    // No default menu configured.
+    return NULL;
   }
   return array(
     'topnav' => array(
