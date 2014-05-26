@@ -156,7 +156,8 @@ class menupoly_MenuTree {
       $submenu_sorted = array();
       $sort = array();
       foreach ($submenu as $k => $mlid) {
-        if ($item = @$this->_items[$mlid]) {
+        if (!empty($this->_items[$mlid])) {
+          $item = $this->_items[$mlid];
           if ($this->_checkItemAccess($item)) {
             $submenu_sorted[$k] = $mlid;
             $sort[$k] = (50000 + $item['weight']) .' '. $item['title'];

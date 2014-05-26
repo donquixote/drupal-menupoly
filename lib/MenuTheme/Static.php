@@ -38,13 +38,13 @@ class menupoly_MenuTheme_Static extends menupoly_MenuTheme_Abstract {
    */
   protected function _itemAttributes($item, $options, $submenu_html) {
     $attr = htmltag_tag_attributes();
-    if (@$item['class']) {
+    if (!empty($item['class'])) {
       $attr->addClass($item['class']);
     }
     $attr->addClass($submenu_html ? 'expanded' : ($item['has_children'] ? 'collapsed' : 'leaf'));
     $attr->addClassesIf(array(
-      'active' => @$item['active'],
-      'active-trail' => @$item['active-trail'],
+      'active' => !empty($item['active']),
+      'active-trail' => !empty($item['active-trail']),
     ));
     return $attr;
   }

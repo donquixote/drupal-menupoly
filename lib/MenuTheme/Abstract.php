@@ -15,13 +15,16 @@ abstract class menupoly_MenuTheme_Abstract implements menupoly_MenuTheme_Interfa
     $i = 0;
     $n = count($items);
     foreach ($items as $k => $item) {
-      @$items[$k]['class'] .= ($i % 2) ? 'odd' : 'even';
+      $class = ($i % 2) ? 'odd' : 'even';
       if ($i == 0) {
-        $items[$k]['class'] .= ' first';
+        $class .= ' first';
       }
-      if ($i == $n-1) {
-        $items[$k]['class'] .= ' last';
+      if ($i == $n - 1) {
+        $class .= ' last';
       }
+      $items[$k]['class'] = isset($item['class'])
+        ? $item['class'] . ' ' . $class
+        : $class;
       ++$i;
     }
   }
