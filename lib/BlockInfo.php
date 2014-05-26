@@ -33,11 +33,11 @@ class menupoly_BlockInfo {
     list($module, $key) = explode('-', $delta);
     $f = $module . '_menupoly';
     if (!function_exists($f)) {
-      return;
+      return NULL;
     }
     $result = $f();
     if (!isset($result[$key])) {
-      return;
+      return NULL;
     }
     $config = $result[$key];
     return $config + array(
