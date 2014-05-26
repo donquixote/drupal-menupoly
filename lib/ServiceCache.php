@@ -43,18 +43,10 @@ class menupoly_ServiceCache {
    *
    * @return menupoly_MenuTreeSource_Interface
    */
-  function __call($method, $args) {
-    $key = serialize(array($method, $args));
+  function menuTreeSource($type) {
+    $key = 'menuTreeSource:' . $type;
     if (!isset($this->cache[$key])) {
-      $method = 'call_' . count($args) . '_' . $method;
-      if (method_exists($this->factory, $method)) {
-        array_unshift($args, $this);
-        $service = call_user_func_array(array($this->factory, $method), $args);
-      }
-      else {
-        throw new Exception("Method $method not provided by service factory.");
-      }
-      $this->cache[$key] = isset($service) ? $service : FALSE;
+      $this->cache[$key] = $this->factory->call_1_menuTreeSource($this, $type);
     }
     return $this->cache[$key];
   }

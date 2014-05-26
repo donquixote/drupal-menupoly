@@ -66,6 +66,8 @@ class menupoly_ServiceFactory {
         $source = new menupoly_MenuTreeSource_MenuLinks();
         $source->setTrailPaths($cache->trailPaths);
         return $source;
+      default:
+        throw new \Exception("Unknown menu tree source type '$type'.");
     }
   }
 
